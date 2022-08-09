@@ -3,8 +3,8 @@ services:
   - docker 
 
 before_install: 
-  - docker build -t idanzigm/frontend-test -f ./frontend/Dockerfile.dev
-  - docker build -t idanzigm/spring-test -f ./RegistryBackend/Dockerfile.dev
+  - docker build -t idanzigm/frontend-test -f ./frontend/Dockerfile.dev ./frontend
+  - docker build -t idanzigm/spring-test -f ./RegistryBackend/Dockerfile.dev ./RegistryBackend
 
 script: 
   - docker run idanzigm/react-test npm test -- --coverage 
@@ -13,7 +13,7 @@ script:
 after_success: 
   - docker build -t idanzigm/frontend ./frontend 
   - docker build -t idanzigm/RegistryBackend ./RegistryBackend 
-  - docker build -t idanzigm/router ./nginx
+  - docker build -t idanzigm/router ./nginx 
 
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
 
