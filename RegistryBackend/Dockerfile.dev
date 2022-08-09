@@ -1,4 +1,6 @@
 FROM openjdk:8
-ADD build/libs/*.jar dockerapp.jar
 EXPOSE 8080
+COPY . . 
+RUN BootJar
+
 ENTRYPOINT ["java", "-jar", "dockerapp.jar"]

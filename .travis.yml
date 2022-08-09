@@ -1,0 +1,22 @@
+sudo: required
+services: 
+  - docker 
+
+before_install: 
+  - docker build -t idanzigm/frontend-test -f ./frontend/Dockerfile.dev
+  - docker build -t idanzigm/spring-test -f ./RegistryBackend/Dockerfile.dev
+
+script: 
+  - docker run idanzigm/react-test npm test -- --coverage 
+  - docker run idanzigm/spring-test ./gradlew test -- --coverage
+
+after_success: 
+  - docker build -t idanzigm/frontend ./frontend 
+  - docker build -t idanzigm/RegistryBackend ./RegistryBackend 
+  - docker build -t idanzigm/router ./nginx
+
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+  - docker push idanzigm/frontend 
+  - docker push idanzigm/RegistryBackend 
+  - docker push idanzigm/router 
