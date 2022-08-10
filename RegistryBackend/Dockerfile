@@ -1,7 +1,4 @@
-FROM openjdk:8
-
-COPY ./build.gradle ./
-RUN sdk install gradle 7.5.1
+FROM eclipse-temurin:8-jdk-jammy
 
 COPY . . 
 
