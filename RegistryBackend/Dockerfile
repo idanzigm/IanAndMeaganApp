@@ -1,6 +1,6 @@
 FROM openjdk:8
 COPY . . 
-RUN BootJar
+RUN bootJar
 
 FROM nginx
 COPY --from=builder build/libs/*.jar dockerapp.jar
