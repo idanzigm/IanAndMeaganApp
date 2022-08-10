@@ -1,6 +1,7 @@
 FROM openjdk:8
 EXPOSE 8080
 COPY . . 
-RUN bootJar
+RUN gradle clean 
+RUN gradle fatJar
 
 ENTRYPOINT ["java", "-jar", "dockerapp.jar"]
