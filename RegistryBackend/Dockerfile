@@ -1,44 +1,18 @@
-FROM ubuntu:latest
-EXPOSE 8080
+# the first stage of our build will use a maven 3.6.1 parent image
+FROM gradle:jdk8 AS GRADLE_BUILD
 
-# Install "software-properties-common" (for the "add-apt-repository")
-RUN apt-get update && apt-get install -y \
-    software-properties-common
-# Add the "JAVA" ppa
-RUN add-apt-repository -y \
-    ppa:webupd8team/java
+# copy the pom and src code to the container
+COPY ./ ./
 
-# Install OpenJDK-8
-RUN apt-get update && \
-    apt-get install -y openjdk-8-jdk && \
-    apt-get install -y ant && \
-    apt-get clean;
-
-# Fix certificate issues
-RUN apt-get update && \
-    apt-get install ca-certificates-java && \
-    apt-get clean && \
-    update-ca-certificates -f \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /var/cache/oracle-jdk8-installer
-
-# Setup JAVA_HOME -- useful for docker commandline
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
-RUN export JAVA_HOME
-
-
-RUN RUN curl -L https://services.gradle.org/distributions/gradle-2.4-bin.zip -o gradle-2.4-bin.zip
-RUN apt-get install -y unzip
-RUN unzip gradle-2.4-bin.zip
-ENV GRADLE_HOME=/app/gradle-2.4 
-ENV PATH=$PATH:$GRADLE_HOME/bin
-
-COPY . . 
-
+# package our application code
 RUN gradle clean 
 RUN gradle fatJar
 
-FROM nginx
-COPY --from=builder build/libs/*.jar dockerapp.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "dockerapp.jar"]
+# the second stage of our build will use open jdk 8 on alpine 3.9
+FROM openjdk:8-jre-alpine3.9
+
+# copy only the artifacts we need from the first stage and discard the rest
+COPY --from=GRADLE_BUILD /RegistryBackend/build/lib/RegistryBackend-0.0.1-SNAPSHOT.jar /registry.jar
+
+# set the startup command to execute the jar
+CMD ["java", "-jar", "/registry.jar"]
