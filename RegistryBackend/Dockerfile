@@ -5,7 +5,7 @@ FROM gradle:jdk8 AS GRADLE_BUILD
 COPY ./ ./
 
 # package our application code
-RUN gradle clean 
+# RUN gradle clean 
 RUN gradle fatJar
 
 # the second stage of our build will use open jdk 8 on alpine 3.9
