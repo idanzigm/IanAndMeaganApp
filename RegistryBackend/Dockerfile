@@ -1,4 +1,9 @@
-FROM eclipse-temurin:8-jdk-jammy
+FROM ubuntu:latest
+EXPOSE 8080
+
+RUN sudo apt-get install openjdk-8-jdk
+RUN curl -s "https://get.sdkman.io" | bash
+RUN sdk install gradle 7.5.1
 
 COPY . . 
 
