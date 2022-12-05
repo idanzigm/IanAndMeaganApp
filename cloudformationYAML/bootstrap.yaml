@@ -1,0 +1,389 @@
+Parameters: 
+
+Resources: 
+#EKS Cluster 
+  Type: AWS::EKS::Cluster
+  Properties: 
+    EncryptionConfig: 
+      Provider: 
+        KeyArn: String #alias of the KMS key
+      Resources: 
+        - String #unsure 
+    KubernetesNetworkConfig: 
+      IpFamily: ipv4
+      ServiceIpv4Cidr: 10.100.0.0/16
+    Logging: 
+      Logging
+    Name: String
+    OutpostConfig: 
+      OutpostConfig
+    ResourcesVpcConfig: 
+      ResourcesVpcConfig
+    RoleArn: String
+    Tags: 
+      - Tag
+    Version: String
+
+#EKS NodeCluster 
+
+
+---
+---
+#API Gateway 
+  #REST API Gateway 
+  Type: AWS::ApiGateway::RestApi
+  Properties: 
+    Body: Json
+    EndpointConfiguration: 
+      Types: 
+        - PRIVATE 
+      VpcEndpointIds: 
+        #- String 
+        #Needs to be filled out 
+    FailOnWarnings: TRUE
+    Name: DoggyWebAPI 
+    Parameters: 
+      Origin : Web
+    Policy: Json
+    Tags: 
+      - Web
+  DependsOn: 
+    - EKS nodes 
+      EKS Cluster 
+
+---
+  #API Gateway Resources Registry 
+  Type: 'AWS::ApiGateway::Resource'
+  Properties: 
+    RestApiId: !Ref DoggyWebAPI 
+    ParentId: !GetAtt 
+      - DoggyWebAPI 
+      - RootResourceId
+    PathPart: 
+      Ref: Registry 
+  DependsOn: 
+    - DoggyWebAPI 
+  
+  #API Gateway Authorizer Registry 
+  Type: AWS::ApiGateway::Authorizer
+  Properties: 
+    AuthorizerCredentials: String
+    AuthorizerResultTtlInSeconds: 3600
+    #there is a single source for now, may be updated later
+    IdentitySource: method.request.header.auth 
+    Name: APIGatewayAuthorizerRegistry
+    ProviderARNs: 
+      - String
+    RestApiId: !Ref DoggyWebAPI
+    Type: COGNITO_USER_POOLS
+
+  #API Gateway Method Registry Post 
+  Type: AWS::ApiGateway::Method
+  Properties: 
+    #AuthorizationScopes: 
+    #  - String
+    #Configure with Cognito 
+    AuthorizationType: COGNITO_USER_POOLS
+    AuthorizerId: !Ref APIGatewayAuthorizerRegistry
+    HttpMethod: POST
+    ResourceId: !GetAtt 
+      - DoggyWebAPI 
+      - RootResourceId
+    RestApiId: !Ref DoggyWebAPI
+
+  #API Gateway Method Registry Get 
+  Type: AWS::ApiGateway::Method
+  Properties: 
+    #AuthorizationScopes: 
+    #  - String
+    #Configure with Cognito 
+    AuthorizationType: COGNITO_USER_POOLS
+    AuthorizerId: !Ref APIGatewayAuthorizerRegistry
+    HttpMethod: Get
+    ResourceId: !GetAtt 
+      - DoggyWebAPI 
+      - RootResourceId
+    RestApiId: !Ref DoggyWebAPI
+    
+  #API Gateway Method Registry Patch 
+  Type: AWS::ApiGateway::Method
+  Properties: 
+    #AuthorizationScopes: 
+    #  - String
+    #Configure with Cognito 
+    AuthorizationType: COGNITO_USER_POOLS
+    AuthorizerId: !Ref APIGatewayAuthorizerRegistry
+    HttpMethod: PATCH
+    ResourceId: !GetAtt 
+      - DoggyWebAPI 
+      - RootResourceId
+    RestApiId: !Ref DoggyWebAPI
+
+  #API Gateway Method Registry Delete 
+  Type: AWS::ApiGateway::Method
+  Properties: 
+    #AuthorizationScopes: 
+    #  - String
+    #Configure with Cognito 
+    AuthorizationType: COGNITO_USER_POOLS
+    AuthorizerId: !Ref APIGatewayAuthorizerRegistry
+    HttpMethod: DELETE
+    ResourceId: !GetAtt 
+      - DoggyWebAPI 
+      - RootResourceId
+    RestApiId: !Ref DoggyWebAPI
+
+---
+  #API Gateway Resources Calendar 
+  Type: 'AWS::ApiGateway::Resource'
+  Properties: 
+    RestApiId: !Ref DoggyWebAPI 
+    ParentId: !GetAtt 
+      - DoggyWebAPI 
+      - RootResourceId
+    PathPart: 
+      Ref: Calendar 
+  DependsOn: 
+    - DoggyWebAPI 
+
+  #API Gateway Authorizer Calendar 
+  Type: AWS::ApiGateway::Authorizer
+  Properties: 
+    AuthorizerCredentials: String
+    AuthorizerResultTtlInSeconds: 3600
+    #there is a single source for now, may be updated later
+    IdentitySource: method.request.header.auth 
+    Name: APIGatewayAuthorizerCalendar
+    ProviderARNs: 
+      - String
+    RestApiId: !Ref DoggyWebAPI
+    Type: COGNITO_USER_POOLS
+
+  #API Gateway Method Calendar Post 
+  Type: AWS::ApiGateway::Method
+  Properties: 
+    #AuthorizationScopes: 
+    #  - String
+    #Configure with Cognito 
+    AuthorizationType: COGNITO_USER_POOLS
+    AuthorizerId: !Ref APIGatewayAuthorizerCalendar
+    HttpMethod: POST
+    ResourceId: !GetAtt 
+      - DoggyWebAPI 
+      - RootResourceId
+    RestApiId: !Ref DoggyWebAPI
+
+  #API Gateway Method Calendar Get 
+  Type: AWS::ApiGateway::Method
+  Properties: 
+    #AuthorizationScopes: 
+    #  - String
+    #Configure with Cognito 
+    AuthorizationType: COGNITO_USER_POOLS
+    AuthorizerId: !Ref APIGatewayAuthorizerCalendar
+    HttpMethod: Get
+    ResourceId: !GetAtt 
+      - DoggyWebAPI 
+      - RootResourceId
+    RestApiId: !Ref DoggyWebAPI
+    
+  #API Gateway Method Calendar Patch 
+  Type: AWS::ApiGateway::Method
+  Properties: 
+    #AuthorizationScopes: 
+    #  - String
+    #Configure with Cognito 
+    AuthorizationType: COGNITO_USER_POOLS
+    AuthorizerId: !Ref APIGatewayAuthorizerCalendar
+    HttpMethod: PATCH
+    ResourceId: !GetAtt 
+      - DoggyWebAPI 
+      - RootResourceId
+    RestApiId: !Ref DoggyWebAPI
+
+  #API Gateway Method Calendar Delete 
+  Type: AWS::ApiGateway::Method
+  Properties: 
+    #AuthorizationScopes: 
+    #  - String
+    #Configure with Cognito 
+    AuthorizationType: COGNITO_USER_POOLS
+    AuthorizerId: !Ref APIGatewayAuthorizerCalendar
+    HttpMethod: DELETE
+    ResourceId: !GetAtt 
+      - DoggyWebAPI 
+      - RootResourceId
+    RestApiId: !Ref DoggyWebAPI
+  
+---
+  #API Gateway Resources User 
+  Type: 'AWS::ApiGateway::Resource'
+  Properties: 
+    RestApiId: !Ref DoggyWebAPI 
+    ParentId: !GetAtt 
+      - DoggyWebAPI 
+      - RootResourceId
+    PathPart: 
+      Ref: User 
+  DependsOn: 
+    - DoggyWebAPI 
+
+  #API Gateway Method User Post 
+  Type: AWS::ApiGateway::Method
+  Properties: 
+    HttpMethod: POST
+    ResourceId: !GetAtt 
+      - DoggyWebAPI 
+      - RootResourceId
+    RestApiId: !Ref DoggyWebAPI
+
+  #API Gateway Method User Get 
+  Type: AWS::ApiGateway::Method
+  Properties: 
+    HttpMethod: Get
+    ResourceId: !GetAtt 
+      - DoggyWebAPI 
+      - RootResourceId
+    RestApiId: !Ref DoggyWebAPI
+    
+  #API Gateway Method User Patch 
+  Type: AWS::ApiGateway::Method
+  Properties: 
+    HttpMethod: PATCH
+    ResourceId: !GetAtt 
+      - DoggyWebAPI 
+      - RootResourceId
+    RestApiId: !Ref DoggyWebAPI
+
+  #API Gateway Method User Delete 
+  Type: AWS::ApiGateway::Method
+  Properties: 
+    HttpMethod: DELETE
+    ResourceId: !GetAtt 
+      - DoggyWebAPI 
+      - RootResourceId
+    RestApiId: !Ref DoggyWebAPI 
+
+---
+---
+#Cognito
+  #IAM Role for SNS 
+  #CognitoUserPool 
+  UserPool: 
+    Type: AWS::Cognito::UserPool
+    Properties: 
+      AccountRecoverySetting:
+        RecoveryMechanisms: 
+          - Name: verified_email 
+            Priority: 1
+          - Name: verified_phone_number
+            Priority: 2
+      AutoVerifiedAttributes: 
+        - email 
+        - sms 
+      EmailConfiguration: 
+          ConfigurationSet: String
+          EmailSendingAccount: DEVELOPER #COGNITO_DEFAULT is better for testing env. 
+          From: DoNotReply@doggyapp.com
+          SourceArn: #the source ARN is the region where the User Pool is located 
+      EnabledMfas: 
+        - SMS_MFA
+      MfaConfiguration: OPTIONAL
+      Policies:
+        PasswordPolicy: 
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+      UsernameConfiguration: 
+        CaseSensitive: false 
+      Schema: 
+        - Name: email 
+          AttributeDataType: String 
+          Mutable: false  
+          Required: true 
+        - Name: name 
+          AttributeDataType: String 
+          Mutable: true 
+          Required: true 
+      SmsAuthenticationMessage: This is your Doggy Athentication number .*\{####\}.*
+      SmsConfiguration: 
+        ExternalId: #a value which adds security (store it in the parameter store)
+        SnsCallerArn: #the ARN of the IAM Role with access to AWS SNS 
+        SnsRegion: #the region of the User Pool 
+      UserAttributeUpdateSettings: 
+        AttributesRequireVerificationBeforeUpdate: 
+          - email
+          - phone_number
+      UsernameAttributes: 
+        - email
+      UsernameConfiguration:
+        CaseSensitive: false
+      UserPoolAddOns: 
+        AdvancedSecurityMode: AUDIT
+      UserPoolName: DoggyApp-user-pool
+      VerificationMessageTemplate: 
+        DefaultEmailOption: CONFIRM_WITH_CODE
+        EmailMessage: This is your verification code...
+        EmailSubject: DoggyApp Verfication
+        SmsMessage: String
+
+  UserPoolClient: 
+    Type: AWS::Cognito::UserPoolClient
+    Properties: 
+      AccessTokenValidity: 24
+      AllowedOAuthFlows: 
+        - code 
+        - implicit
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthScopes: 
+        - email
+        - phone 
+        - openid
+        - profile 
+      AuthSessionValidity: 15
+      CallbackURLs: 
+        - #the URL of the home page where the user is redirected after 
+        #successful sign in 
+      ClientName: DoggyAppClient
+      DefaultRedirectURI: #URL of the homepage 
+      ExplicitAuthFlows: 
+        - ALLOW_USER_SRP_AUTH
+      IdTokenValidity: 24
+      LogoutURLs: 
+        - #URL of the homepage 
+      PreventUserExistenceErrors: ENABLED
+      RefreshTokenValidity: 24
+      SupportedIdentityProviders: 
+        - Facebook
+        - Google
+        - SignInWithApple
+        - LoginWithAmazon
+        - COGNITO
+      TokenValidityUnits: 
+        AccessToken: hours
+        IdToken: hours
+        RefreshToken: hours
+      UserPoolId: !REF DoggyApp-user-pool
+      WriteAttributes: 
+        - email_verified
+
+  UserPoolDomain: 
+    Type: AWS::Cognito::UserPoolDomain
+    Properties: 
+      Domain: #this field denotes the first part of the domain before 
+      #.auth.[region].amazoncognito.com
+      UserPoolId: !REF DoggyApp-user-pool
+
+---
+---
+#DynamoDB.1 
+
+---
+#DynamoDB.2 
+
+
+---
+---
+#S3 
