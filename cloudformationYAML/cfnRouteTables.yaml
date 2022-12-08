@@ -1,0 +1,170 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Multi-az Route Tables set up for Doggy App 
+
+Parameters:
+#Stack Parameters 
+  vpcStack: 
+    Type: String
+#Tag parameters 
+  Name: 
+    Type: String 
+  owner: 
+    Type: String
+  ownerEmail: 
+    Type: String
+  environment: 
+    Type: String
+    AllowedValues: 
+      - production
+      - development
+  project: 
+    Type: String
+
+Resources: 
+##Route Tables 
+  publicRouteTable0: 
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: Name 
+          Value: !Join ['-', [!Ref 'AWS::StackName', public, !Select [ 0, !GetAZs "" ], rt ]]
+        - Key: owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+      VpcId: { 'Fn::ImportValue': !Sub '${cfnVpcStack}-vpc-id' } 
+
+  publicRouteTable1: 
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: Name 
+          Value: !Join ['-', [!Ref 'AWS::StackName', public, !Select [ 1, !GetAZs "" ], rt ]]
+        - Key: owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+      VpcId: { 'Fn::ImportValue': !Sub '${cfnVpcStack}-vpc-id' }
+
+  privateRouteTable0: 
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: Name 
+          Value: !Join ['-', [!Ref 'AWS::StackName', private, !Select [ 0, !GetAZs "" ], rt ]]
+        - Key: owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+      VpcId: { 'Fn::ImportValue': !Sub '${cfnVpcStack}-vpc-id' }
+
+  privateRouteTable1: 
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: Name 
+          Value: !Join ['-', [!Ref 'AWS::StackName', private, !Select [ 1, !GetAZs "" ], rt ]]
+        - Key: owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+      VpcId: { 'Fn::ImportValue': !Sub '${cfnVpcStack}-vpc-id' }
+
+  protectedRouteTable0: 
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: Name 
+          Value: !Join ['-', [!Ref 'AWS::StackName', protected, !Select [ 0, !GetAZs "" ], rt ]]
+        - Key: owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+      VpcId: { 'Fn::ImportValue': !Sub '${cfnVpcStack}-vpc-id' }
+
+  protectedRouteTable1: 
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: Name 
+          Value: !Join ['-', [!Ref 'AWS::StackName', protected, !Select [ 1, !GetAZs "" ], rt ]]
+        - Key: owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+      VpcId: { 'Fn::ImportValue': !Sub '${cfnVpcStack}-vpc-id' }
+
+##Route Table Association 
+  publicSubnetRTAssociation0: 
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn:
+      - publicRouteTable0
+    Properties: 
+      RouteTableId: !Ref publicRouteTable0
+      SubnetId: { 'Fn::ImportValue': !Sub '${cfnVpcStack}-publicSubnet0-id' }
+
+  publicSubnetRTAssociation1: 
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn: 
+      - publicRouteTable1
+    Properties: 
+      RouteTableId: !Ref publicRouteTable1
+      SubnetId: { 'Fn::ImportValue': !Sub '${cfnVpcStack}-publicSubnet1-id' }
+
+  privateSubnetRTAssociation0: 
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn: 
+      - privateRouteTable0
+    Properties: 
+      RouteTableId: !Ref privateRouteTable0
+      SubnetId: { 'Fn::ImportValue': !Sub '${cfnVpcStack}-privateSubnet0-id' }
+
+  privateSubnetRTAssociation1: 
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn: 
+      - privateRouteTable1
+    Properties: 
+      RouteTableId: !Ref privateRouteTable1
+      SubnetId: { 'Fn::ImportValue': !Sub '${cfnVpcStack}-privateSubnet1-id' }
+
+  protectedSubnetRTAssociation0: 
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn: 
+      - protectedRouteTable0
+    Properties: 
+      RouteTableId: !Ref protectedRouteTable0
+      SubnetId: { 'Fn::ImportValue': !Sub '${cfnVpcStack}-protectedSubnet0-id' }
+
+  protectedSubnetRTAssociation1: 
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn: 
+      - protectedRouteTable1
+    Properties: 
+      RouteTableId: !Ref protectedRouteTable1
+      SubnetId: { 'Fn::ImportValue': !Sub '${cfnVpcStack}-protectedSubnet1-id' }
+
+Outputs:

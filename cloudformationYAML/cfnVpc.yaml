@@ -1,0 +1,318 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Multi-az VPC set up for Doggy App 
+
+Parameters:
+  vpcCiderBlock: 
+    Type: String
+  publicSubnet0Cidr: 
+    Type: String 
+  publicSubnet1Cidr: 
+    Type: String 
+  privateSubnet0Cidr: 
+    Type: String 
+  privateSubnet1Cidr: 
+    Type: String 
+  protectedSubnet0Cidr: 
+    Type: String 
+  protectedSubnet1Cidr: 
+    Type: String
+  isPublic: 
+    Type: String 
+    Default: 'true'
+    AllowedValues:
+      - 'true'
+      - 'false'
+#Tag parameters 
+  name: 
+    Type: String 
+  owner: 
+    Type: String
+  ownerEmail: 
+    Type: String
+  environment: 
+    Type: String
+    AllowedValues: 
+      - production
+      - development
+  project: 
+    Type: String
+
+Conditions:
+  isPublic: !Equals [ !Ref isPublic, 'true']
+
+Resources: 
+#VPC
+  vpc0:
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock: !Ref vpcCiderBlock
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags: 
+        - Key: Name 
+          Value: !Sub '${AWS::StackName}-${environment}-vpc'
+        - Key: Owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+
+  igw0: 
+    Type: AWS::EC2::InternetGateway
+    Condition: isPublic 
+    Properties: 
+      Tags:
+        - Key: Name 
+          Value: !Sub '${AWS::StackName}-${environment}-igw'
+        - Key: Owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+
+  igw0Attach:
+    Type: AWS::EC2::VPCGatewayAttachment
+    DependsOn:
+      - igw0
+      - vpc0
+    Properties: 
+      InternetGatewayId: !Ref igw0
+      VpcId: !Ref vpc0
+
+##Subnets 
+  publicSubnet0: 
+    Type: AWS::EC2::Subnet
+    DependsOn:
+      - vpc0
+    Condition: isPublic
+    Properties: 
+      AvailabilityZone: !Select [ 0, !GetAZs "" ]
+      CidrBlock: !Ref publicSubnet0Cidr
+      MapPublicIpOnLaunch: false
+      Tags: 
+        - Key: Name 
+          Value: !Join ['-', [!Ref 'AWS::StackName', public, !Select [ 0, !GetAZs "" ] ]]
+        - Key: Owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+      VpcId: !Ref vpc0
+
+  publicSubnet1:
+    Type: AWS::EC2::Subnet
+    DependsOn:
+      - vpc0
+    Condition: isPublic
+    Properties: 
+      AvailabilityZone: !Select [ 1, !GetAZs "" ]
+      CidrBlock: !Ref publicSubnet1Cidr
+      MapPublicIpOnLaunch: false
+      Tags: 
+        - Key: Name 
+          Value: !Join ['-', [!Ref 'AWS::StackName', public, !Select [ 1, !GetAZs "" ] ]]
+        - Key: Owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+      VpcId: !Ref vpc0
+
+  privateSubnet0:
+    Type: AWS::EC2::Subnet
+    DependsOn:
+      - vpc0
+    Properties: 
+      AvailabilityZone: !Select [ 0, !GetAZs "" ]
+      CidrBlock: !Ref privateSubnet0Cidr
+      MapPublicIpOnLaunch: false
+      Tags: 
+        - Key: Name 
+          Value: !Join ['-', [!Ref 'AWS::StackName', private, !Select [ 0, !GetAZs "" ] ]]
+        - Key: Owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+      VpcId: !Ref vpc0
+
+  privateSubnet1:
+    Type: AWS::EC2::Subnet
+    DependsOn:
+      - vpc0
+    Properties: 
+      AvailabilityZone: !Select [ 1, !GetAZs "" ]
+      CidrBlock: !Ref privateSubnet1Cidr
+      MapPublicIpOnLaunch: false
+      Tags: 
+        - Key: Name 
+          Value: !Sub !Join ['-', [!Ref 'AWS::StackName', private, !Select [ 1, !GetAZs "" ] ]]
+        - Key: Owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+      VpcId: !Ref vpc0
+
+  protectedSubnet0:
+    Type: AWS::EC2::Subnet
+    DependsOn:
+      - vpc0
+    Properties: 
+      AvailabilityZone: !Select [ 0, !GetAZs "" ]
+      CidrBlock: !Ref protectedSubnet0Cidr
+      MapPublicIpOnLaunch: false
+      Tags: 
+        - Key: Name 
+          Value: !Join ['-', [!Ref 'AWS::StackName', protected, !Select [ 0, !GetAZs "" ] ]]
+        - Key: Owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+      VpcId: !Ref vpc0
+
+  protectedSubnet1:
+    Type: AWS::EC2::Subnet
+    DependsOn:
+      - vpc0
+    Properties: 
+      AvailabilityZone: !Select [ 1, !GetAZs "" ]
+      CidrBlock: !Ref protectedSubnet1Cidr
+      MapPublicIpOnLaunch: false
+      Tags: 
+        - Key: Name 
+          Value: !Join ['-', [!Ref 'AWS::StackName', protected, !Select [ 1, !GetAZs "" ] ]]
+        - Key: Owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+      VpcId: !Ref vpc0
+
+##NAT Gatway 
+###Elastic IP 
+  eip0:
+    Type: AWS::EC2::EIP
+    Properties: 
+      Domain: vpc
+      Tags: 
+        - Key: Owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+
+  eip1:
+    Type: AWS::EC2::EIP
+    Properties: 
+      Domain: vpc
+      Tags: 
+        - Key: Owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+
+###Gateways
+  natGw0: 
+    Type: AWS::EC2::NatGateway
+    DependsOn:
+      - eip0
+      - publicSubnet0 
+    Properties: 
+      AllocationId: !GetAtt eip0.AllocationId
+      SubnetId: !Ref publicSubnet0
+      Tags: 
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+
+  natGw1: 
+    Type: AWS::EC2::NatGateway
+    DependsOn:
+      - eip1
+      - publicSubnet1
+    Properties: 
+      AllocationId: !GetAtt eip1.AllocationId
+      SubnetId: !Ref publicSubnet1
+      Tags: 
+        - Key: Owner
+          Value: !Ref owner
+        - Key: OwnerEmail 
+          Value: !Ref ownerEmail
+        - Key: Environment 
+          Value: !Ref environment 
+        - Key: project 
+          Value: !Ref project 
+
+Outputs:
+  vpc0id: 
+    Value: !Ref vpc0
+    Export: 
+      Name: !Sub '${AWS::StackName}-vpc-id'
+
+  pubicSubnet0Id: 
+    Value: !Ref publicSubnet0
+    Export: 
+      Name: !Sub '${AWS::StackName}-publicSubnet0-id'
+
+  pubicSubnet1Id: 
+    Value: !Ref publicSubnet1
+    Export: 
+      Name: !Sub '${AWS::StackName}-publicSubnet1-id'
+
+  privateSubnet0Id: 
+    Value: !Ref privateSubnet0
+    Export: 
+      Name: !Sub '${AWS::StackName}-privateSubnet0-id'
+
+  privateSubnet1Id: 
+    Value: !Ref privateSubnet1
+    Export: 
+      Name: !Sub '${AWS::StackName}-privateSubnet1-id'
+
+  protectedSubnet0Id: 
+    Value: !Ref protectedSubnet0
+    Export: 
+      Name: !Sub '${AWS::StackName}-protectedSubnet0-id'
+
+  protectedSubnet1Id: 
+    Value: !Ref protectedSubnet1
+    Export: 
+      Name: !Sub '${AWS::StackName}-protectedSubnet1-id'

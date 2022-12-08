@@ -1,28 +1,28 @@
 Parameters: 
 
 Resources: 
-#EKS Cluster 
-  Type: AWS::EKS::Cluster
-  Properties: 
-    EncryptionConfig: 
-      Provider: 
-        KeyArn: String #alias of the KMS key
-      Resources: 
-        - String #unsure 
-    KubernetesNetworkConfig: 
-      IpFamily: ipv4
-      ServiceIpv4Cidr: 10.100.0.0/16
-    Logging: 
-      Logging
-    Name: String
-    OutpostConfig: 
-      OutpostConfig
-    ResourcesVpcConfig: 
-      ResourcesVpcConfig
-    RoleArn: String
-    Tags: 
-      - Tag
-    Version: String
+  eksCluster: 
+    Type: AWS::EKS::Cluster
+    Properties: 
+      EncryptionConfig: 
+        Provider: 
+          KeyArn: String #alias of the KMS key
+        Resources: 
+          - String #unsure 
+      KubernetesNetworkConfig: 
+        IpFamily: ipv4
+        ServiceIpv4Cidr: 10.100.0.0/16
+      Logging: 
+        Logging
+      Name: Cluster
+      OutpostConfig: 
+        OutpostConfig
+      ResourcesVpcConfig: 
+        ResourcesVpcConfig
+      RoleArn: String
+      Tags: 
+        - Tag
+      Version: String
 
 #EKS NodeCluster 
 
@@ -30,27 +30,28 @@ Resources:
 ---
 ---
 #API Gateway 
-  #REST API Gateway 
-  Type: AWS::ApiGateway::RestApi
-  Properties: 
-    Body: Json
-    EndpointConfiguration: 
-      Types: 
-        - PRIVATE 
-      VpcEndpointIds: 
-        #- String 
-        #Needs to be filled out 
-    FailOnWarnings: TRUE
-    Name: DoggyWebAPI 
-    Parameters: 
-      Origin : Web
-    Policy: Json
-    Tags: 
-      - Web
-  DependsOn: 
-    - EKS nodes 
-      EKS Cluster 
+  restApiGateway:  
+    Type: AWS::ApiGateway::RestApi
+    Properties: 
+      Body: Json
+      EndpointConfiguration: 
+        Types: 
+          - PRIVATE 
+        VpcEndpointIds: 
+          #- String 
+          #Needs to be filled out 
+      FailOnWarnings: TRUE
+      Name: DoggyWebAPI 
+      Parameters: 
+        Origin : Web
+      Policy: Json
+      Tags: 
+        - Web
+    DependsOn: 
+      - EKS nodes 
+        EKS Cluster 
 
+#needs to be indented 
 ---
   #API Gateway Resources Registry 
   Type: 'AWS::ApiGateway::Resource'
